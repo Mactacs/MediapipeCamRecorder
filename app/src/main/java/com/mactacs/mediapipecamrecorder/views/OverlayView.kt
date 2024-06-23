@@ -23,6 +23,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.mactacs.mediapipecamrecorder.utils.ImageSegmenterHelper
+import com.mactacs.mediapipecamrecorder.utils.MediaVideoEncoder
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
@@ -35,6 +36,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     private var scaleBitmap: Bitmap? = null
     private var runningMode: RunningMode = RunningMode.IMAGE
+    private var mediaVideoEncoder : MediaVideoEncoder? = null
 
     fun clear() {
         scaleBitmap = null
@@ -75,6 +77,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             Bitmap.Config.ARGB_8888
         )
 
+        mediaVideoEncoder?.setBitmapFrame(image)
+
         val scaleFactor = when (runningMode) {
             RunningMode.IMAGE,
             RunningMode.VIDEO -> {
@@ -95,6 +99,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             image, scaleWidth, scaleHeight, false
         )
         invalidate()
+    }
+
+    fun setVideoEncoder(videoEncoder : MediaVideoEncoder?) {
+        this.mediaVideoEncoder = videoEncoder
     }
 
 }

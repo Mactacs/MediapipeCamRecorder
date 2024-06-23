@@ -1,5 +1,6 @@
 package com.mactacs.mediapipecamrecorder.utils;
 
+import android.graphics.Bitmap;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
@@ -60,6 +61,11 @@ public class MediaVideoEncoder extends MediaEncoder {
                 Log.e(TAG, "prepare:", e);
             }
         }
+    }
+
+
+    public void setBitmapFrame(Bitmap bitmap) {
+        encodeBitmap(bitmap, mSurface);
     }
 
     @Override

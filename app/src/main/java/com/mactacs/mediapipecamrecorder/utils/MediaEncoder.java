@@ -1,8 +1,11 @@
 package com.mactacs.mediapipecamrecorder.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.util.Log;
+import android.view.Surface;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -348,6 +351,14 @@ public abstract class MediaEncoder implements Runnable {
                 }
             }
         }
+    }
+
+    protected void encodeBitmap(Bitmap bitmap, Surface surface) {
+        if (!mIsCapturing) return;
+        Canvas canvas = surface.lockCanvas(null);
+        canvas.drawBitmap(bitmap, 0, 0, null);
+        surface.unlockCanvasAndPost(canvas);
+        frameAvailableSoon();
     }
 
     /**
