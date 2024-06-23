@@ -242,7 +242,7 @@ class ImageSegmenterHelper(
                 mpImage.width,
                 mpImage.height,
                 inferenceTime,
-                cameraFrame!!
+                cameraFrame
             )
         )
     }
@@ -262,7 +262,7 @@ class ImageSegmenterHelper(
         val width: Int,
         val height: Int,
         val inferenceTime: Long,
-        val cameraFrame : Bitmap
+        val cameraFrame : Bitmap?
     )
 
     companion object {

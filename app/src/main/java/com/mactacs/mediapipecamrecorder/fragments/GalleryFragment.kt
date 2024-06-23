@@ -344,7 +344,8 @@ class GalleryFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
                 ByteBufferExtractor.extract(newImage),
                 newImage.width,
                 newImage.height,
-                result.timestampMs()
+                result.timestampMs(),
+                null
             )
         )
     }
@@ -359,7 +360,8 @@ class GalleryFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
                     fragmentGalleryBinding.overlayView.setResults(
                         resultBundle.results,
                         resultBundle.width,
-                        resultBundle.height
+                        resultBundle.height,
+                        null
                     )
                 }
             }

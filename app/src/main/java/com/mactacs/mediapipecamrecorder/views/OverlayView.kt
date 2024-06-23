@@ -59,10 +59,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         byteBuffer: ByteBuffer,
         outputWidth: Int,
         outputHeight: Int,
-        cameraFrame : Bitmap
+        cameraFrame : Bitmap?
     ) {
-        val originalByte = IntArray(cameraFrame.width*cameraFrame.height)
-        cameraFrame.getPixels(originalByte,0,cameraFrame.width,0,0,cameraFrame.width,cameraFrame.height)
+        val originalByte = IntArray(cameraFrame!!.width* cameraFrame.height)
+        cameraFrame.getPixels(originalByte,0, cameraFrame.width,0,0, cameraFrame.width, cameraFrame.height)
         // Create the mask bitmap with colors and the set of detected labels.
         val pixels = IntArray(byteBuffer.capacity())
         for (i in pixels.indices) {
@@ -84,7 +84,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             Bitmap.Config.ARGB_8888
         )
 
-        mediaVideoEncoder?.setBitmapFrame(image)
+//        mediaVideoEncoder?.setBitmapFrame(image)
 
         val scaleFactor = when (runningMode) {
             RunningMode.IMAGE,
