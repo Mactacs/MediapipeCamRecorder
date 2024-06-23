@@ -45,6 +45,6 @@
     </fragment>
     <fragment
         android:id="@+id/gallery_fragment"
-        android:name="com.google.mediapipe.examples.imagesegmenter.fragments.GalleryFragment"
+        android:name="com.mactacs.mediapipecamrecorder.fragments.GalleryFragment"
         android:label="GalleryFragment" />
 </navigation>
