@@ -11,13 +11,27 @@
         android:layout_height="match_parent"
         app:scaleType="fillStart" />
 
-    <com.mactacs.mediapipecamrecorder.views.OverlayView
-        android:id="@+id/overlay_view"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
+        <com.mactacs.mediapipecamrecorder.views.OverlayView
+            android:id="@+id/overlay_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:id="@+id/video_button"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginBottom="30dp"
+            android:background="@drawable/ic_camera_video_shutter"
+            android:layout_gravity="center_horizontal|bottom"/>
+
+    </FrameLayout>
     <include
         android:id="@+id/bottom_sheet_layout"
         layout="@layout/info_bottom_sheet" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

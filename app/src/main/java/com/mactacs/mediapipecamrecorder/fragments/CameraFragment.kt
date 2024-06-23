@@ -20,30 +20,38 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
+import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.mactacs.mediapipecamrecorder.MainViewModel
 import com.mactacs.mediapipecamrecorder.R
 import com.mactacs.mediapipecamrecorder.databinding.FragmentCameraBinding
 import com.mactacs.mediapipecamrecorder.utils.ImageSegmenterHelper
+import com.mactacs.mediapipecamrecorder.utils.MediaAudioEncoder
+import com.mactacs.mediapipecamrecorder.utils.MediaEncoder
+import com.mactacs.mediapipecamrecorder.utils.MediaMuxerWrapper
+import com.mactacs.mediapipecamrecorder.utils.MediaVideoEncoder
+import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import androidx.camera.core.*
-import com.google.mediapipe.tasks.vision.core.RunningMode
 
 class CameraFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
 
     companion object {
         private const val TAG = "Image segmenter"
+        private const val VIDEO_WIDTH = 720
+        private const val VIDEO_HEIGHT = 1280
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -60,6 +68,8 @@ class CameraFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
 
     /** Blocking operations are performed using this executor */
     private var backgroundExecutor: ExecutorService? = null
+
+    private var isRecording = false
 
     override fun onResume() {
         super.onResume()
@@ -113,6 +123,16 @@ class CameraFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
         _fragmentCameraBinding =
             FragmentCameraBinding.inflate(inflater, container, false)
 
+        fragmentCameraBinding.videoButton.setOnClickListener {
+            isRecording = !isRecording
+            if(isRecording) {
+                fragmentCameraBinding.videoButton.setBackgroundResource(R.drawable.ic_camera_video_recording_normal)
+                startRecording()
+            } else {
+                fragmentCameraBinding.videoButton.setBackgroundResource(R.drawable.ic_camera_video_shutter)
+                stopRecording()
+            }
+        }
         return fragmentCameraBinding.root
     }
 
@@ -233,7 +253,8 @@ class CameraFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
             .build()
 
         imageAnalyzer =
-            ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            ImageAnalysis.Builder()
+                .setTargetResolution(Size(VIDEO_WIDTH, VIDEO_HEIGHT))
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -294,5 +315,51 @@ class CameraFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
             )
             binding.overlayView.invalidate()
         }
+    }
+
+    /**
+     * callback methods from encoder
+     */
+    private val mMediaEncoderListener : MediaEncoder.MediaEncoderListener = object : MediaEncoder.MediaEncoderListener {
+        override fun onPrepared(encoder: MediaEncoder?) {
+            if (encoder is MediaVideoEncoder)
+                fragmentCameraBinding.overlayView.setVideoEncoder(encoder)
+        }
+
+        override fun onStopped(encoder: MediaEncoder?) {
+            if (encoder is MediaVideoEncoder)
+                fragmentCameraBinding.overlayView.setVideoEncoder(null)
+        }
+
+    }
+
+    private var mMuxer: MediaMuxerWrapper? = null
+
+    private fun startRecording() {
+        try {
+            mMuxer = MediaMuxerWrapper(".mp4") // if you record audio only, ".m4a" is also OK.
+
+            // for video capturing
+            MediaVideoEncoder(
+                mMuxer,
+                mMediaEncoderListener,
+                VIDEO_WIDTH,
+                VIDEO_HEIGHT
+            )
+            MediaAudioEncoder(mMuxer, mMediaEncoderListener)
+            mMuxer?.prepare()
+            mMuxer?.startRecording()
+        } catch (e: IOException) {
+            Log.e(javaClass.name + " -> startCapture:" , e.message.toString())
+        }
+    }
+
+    private fun stopRecording() {
+        if (mMuxer != null) {
+            // print file path
+            Toast.makeText(this@CameraFragment.requireContext(),"File Path : " + mMuxer!!.filePath, Toast.LENGTH_SHORT).show()
+            mMuxer!!.stopRecording()
+        }
+        System.gc()
     }
 }
