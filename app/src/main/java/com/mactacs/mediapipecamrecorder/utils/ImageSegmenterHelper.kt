@@ -43,6 +43,14 @@ class ImageSegmenterHelper(
     // will not change, a lazy val would be preferable.
     private var imagesegmenter: ImageSegmenter? = null
 
+    private val cameraFrameLock = Any()
+    var cameraFrame: Bitmap? = null
+        set(value) {
+            synchronized(cameraFrameLock) {
+                field = value
+            }
+        }
+
     init {
         setupImageSegmenter()
     }
@@ -174,7 +182,7 @@ class ImageSegmenterHelper(
 
         imageProxy.close()
 
-        val rotatedBitmap = Bitmap.createBitmap(
+        cameraFrame = Bitmap.createBitmap(
             bitmapBuffer,
             0,
             0,
@@ -184,7 +192,7 @@ class ImageSegmenterHelper(
             true
         )
 
-        val mpImage = BitmapImageBuilder(rotatedBitmap).build()
+        val mpImage = BitmapImageBuilder(cameraFrame).build()
 
         imagesegmenter?.segmentAsync(mpImage, frameTime)
     }
@@ -233,7 +241,8 @@ class ImageSegmenterHelper(
                 ByteBufferExtractor.extract(mpImage),
                 mpImage.width,
                 mpImage.height,
-                inferenceTime
+                inferenceTime,
+                cameraFrame!!
             )
         )
     }
@@ -253,6 +262,7 @@ class ImageSegmenterHelper(
         val width: Int,
         val height: Int,
         val inferenceTime: Long,
+        val cameraFrame : Bitmap
     )
 
     companion object {

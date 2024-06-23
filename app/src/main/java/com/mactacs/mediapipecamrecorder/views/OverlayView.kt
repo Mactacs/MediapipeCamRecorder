@@ -20,6 +20,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.mactacs.mediapipecamrecorder.utils.ImageSegmenterHelper
@@ -57,8 +58,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     fun setResults(
         byteBuffer: ByteBuffer,
         outputWidth: Int,
-        outputHeight: Int
+        outputHeight: Int,
+        cameraFrame : Bitmap
     ) {
+        val originalByte = IntArray(cameraFrame.width*cameraFrame.height)
+        cameraFrame.getPixels(originalByte,0,cameraFrame.width,0,0,cameraFrame.width,cameraFrame.height)
         // Create the mask bitmap with colors and the set of detected labels.
         val pixels = IntArray(byteBuffer.capacity())
         for (i in pixels.indices) {
@@ -67,8 +71,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             // Deeplab uses 0 for background and other labels are 1-19,
             // so only providing 20 colors from ImageSegmenterHelper -> labelColors
             val index = byteBuffer.get(i).toUInt() % 20U
-            val color = ImageSegmenterHelper.labelColors[index.toInt()].toAlphaColor()
-            pixels[i] = color
+            if (index.toInt() == 0) {
+                pixels[i] = ImageSegmenterHelper.labelColors[index.toInt()].toAlphaColor()
+            } else {
+                pixels[i] = originalByte[i]
+            }
         }
         val image = Bitmap.createBitmap(
             pixels,

@@ -311,7 +311,8 @@ class CameraFragment : Fragment(), ImageSegmenterHelper.SegmenterListener {
             binding.overlayView.setResults(
                 resultBundle.results,
                 resultBundle.width,
-                resultBundle.height
+                resultBundle.height,
+                resultBundle.cameraFrame
             )
             binding.overlayView.invalidate()
         }
